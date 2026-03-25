@@ -1,8 +1,9 @@
-displayName: Block Path
-summary: Blocks HTTP requests with a path matching the configured regex.
+displayName: Block Path with Status Codes
+summary: Blocks HTTP requests with a path matching the configured regex and return a defined StatusCode.
 type: middleware
 import: github.com/ONPIER-OSS/traefik-blockpath
 compatibility: TODO
 testData:
   Regex:
     - "^/foo(.*)"
+  statusCode: 404

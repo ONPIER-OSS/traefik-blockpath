@@ -10,8 +10,8 @@ import (
 
 // Config holds the plugin configuration.
 type Config struct {
-	Regex      []string `json:"regex,omitempty"`
-	StatusCode int
+	Regex      []string `yaml:"regex,omitempty"`
+	StatusCode int      `yaml:"statusCode"`
 }
 
 // CreateConfig creates and initializes the plugin configuration.
