@@ -1,3 +1,3 @@
-module github.com/traefik/plugin-blockpath
+module github.com/ONPIER-OSS/traefik-blockpath
 
 go 1.26
