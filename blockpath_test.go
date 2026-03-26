@@ -1,4 +1,4 @@
-package plugin_blockpath
+package traefik_blockpath
 
 import (
 	"context"
