@@ -43,7 +43,9 @@ func TestNew(t *testing.T) {
 func TestServeHTTP(t *testing.T) {
 	tests := []struct {
 		desc          string
+		methods       []string
 		regexps       []string
+		reqMethod     string
 		reqPath       string
 		statusCode    int
 		expNextCall   bool
@@ -52,6 +54,7 @@ func TestServeHTTP(t *testing.T) {
 		{
 			desc:          "should return forbidden status",
 			regexps:       []string{"/test"},
+			reqMethod:     http.MethodGet,
 			reqPath:       "/test",
 			expNextCall:   false,
 			expStatusCode: http.StatusForbidden,
@@ -59,6 +62,7 @@ func TestServeHTTP(t *testing.T) {
 		{
 			desc:          "should return forbidden status",
 			regexps:       []string{"/test", "/toto"},
+			reqMethod:     http.MethodGet,
 			reqPath:       "/toto",
 			expNextCall:   false,
 			expStatusCode: http.StatusForbidden,
@@ -66,12 +70,14 @@ func TestServeHTTP(t *testing.T) {
 		{
 			desc:          "should return ok status",
 			regexps:       []string{"/test", "/toto"},
+			reqMethod:     http.MethodGet,
 			reqPath:       "/plop",
 			expNextCall:   true,
 			expStatusCode: http.StatusOK,
 		},
 		{
 			desc:          "should return ok status",
+			reqMethod:     http.MethodGet,
 			reqPath:       "/test",
 			expNextCall:   true,
 			expStatusCode: http.StatusOK,
@@ -79,6 +85,7 @@ func TestServeHTTP(t *testing.T) {
 		{
 			desc:          "should return forbidden status",
 			regexps:       []string{`^/bar(.*)`},
+			reqMethod:     http.MethodPost,
 			reqPath:       "/bar/foo",
 			expNextCall:   false,
 			expStatusCode: http.StatusForbidden,
@@ -86,6 +93,7 @@ func TestServeHTTP(t *testing.T) {
 		{
 			desc:          "should return ok status",
 			regexps:       []string{`^/bar(.*)`},
+			reqMethod:     http.MethodGet,
 			reqPath:       "/foo/bar",
 			expNextCall:   true,
 			expStatusCode: http.StatusOK,
@@ -93,6 +101,7 @@ func TestServeHTTP(t *testing.T) {
 		{
 			desc:          "should return defined statuscode not found",
 			regexps:       []string{`^/bar(.*)`},
+			reqMethod:     http.MethodGet,
 			reqPath:       "/bar/foo",
 			statusCode:    http.StatusNotFound,
 			expNextCall:   false,
@@ -101,6 +110,7 @@ func TestServeHTTP(t *testing.T) {
 		{
 			desc:          "should return ok status with not matching and statuscode set",
 			regexps:       []string{"/test", "/toto"},
+			reqMethod:     http.MethodPost,
 			reqPath:       "/plop",
 			statusCode:    http.StatusNotFound,
 			expNextCall:   true,
@@ -108,8 +118,37 @@ func TestServeHTTP(t *testing.T) {
 		},
 		{
 			desc:          "should return ok status with no regex and statuscode set",
+			reqMethod:     http.MethodGet,
 			reqPath:       "/test",
 			statusCode:    http.StatusForbidden,
+			expNextCall:   true,
+			expStatusCode: http.StatusOK,
+		},
+		{
+			desc:          "should return not found status for defined methods",
+			methods:       []string{http.MethodGet, http.MethodPost},
+			regexps:       []string{"/test"},
+			reqMethod:     http.MethodGet,
+			reqPath:       "/test",
+			statusCode:    http.StatusNotFound,
+			expNextCall:   false,
+			expStatusCode: http.StatusNotFound,
+		},
+		{
+			desc:          "should return ok status with not matching method",
+			methods:       []string{http.MethodGet},
+			regexps:       []string{"/test", "/toto"},
+			reqMethod:     http.MethodPost,
+			reqPath:       "/toto",
+			expNextCall:   true,
+			expStatusCode: http.StatusOK,
+		},
+		{
+			desc:          "should return ok status with not matching path",
+			methods:       []string{http.MethodPost},
+			regexps:       []string{"/toto"},
+			reqMethod:     http.MethodPost,
+			reqPath:       "/test",
 			expNextCall:   true,
 			expStatusCode: http.StatusOK,
 		},
@@ -122,6 +161,10 @@ func TestServeHTTP(t *testing.T) {
 			cfg.Regex = test.regexps
 			if test.statusCode != 0 {
 				cfg.StatusCode = test.statusCode
+			}
+
+			if test.methods != nil {
+				cfg.Methods = test.methods
 			}
 
 			nextCall := false
@@ -137,7 +180,7 @@ func TestServeHTTP(t *testing.T) {
 			recorder := httptest.NewRecorder()
 
 			url := "http://localhost" + test.reqPath
-			req := httptest.NewRequest(http.MethodGet, url, http.NoBody)
+			req := httptest.NewRequest(test.reqMethod, url, http.NoBody)
 
 			handler.ServeHTTP(recorder, req)
 
