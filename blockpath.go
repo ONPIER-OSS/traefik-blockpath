@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"slices"
 )
 
 // Config holds the plugin configuration.
@@ -66,11 +67,9 @@ func (b *blockPath) ServeHTTP(responseWriter http.ResponseWriter, req *http.Requ
 				return
 			}
 			// else block only for that specific methods
-			for _, m := range b.methods {
-				if currentMethod == m {
-					responseWriter.WriteHeader(b.statuscode)
-					return
-				}
+			if slices.Contains(b.methods, currentMethod) {
+				responseWriter.WriteHeader(b.statuscode)
+				return
 			}
 		}
 	}
