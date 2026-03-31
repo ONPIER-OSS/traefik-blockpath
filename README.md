@@ -17,14 +17,14 @@ response when the requested HTTP path and method matches one the configured [reg
 
 [experimental.plugins.blockpath]
     modulename = "github.com/ONPIER-OSS/traefik-blockpath"
-    version = "v0.2.4"
+    version = "v0.2.5"
 ```
 
 ## Dynamic
 
 To configure the `Block Path` plugin you should create a [middleware](https://docs.traefik.io/middlewares/overview/) in 
 your dynamic configuration as explained [here](https://docs.traefik.io/middlewares/overview/). The following example creates
-and uses the `blockpath` middleware plugin to block all HTTP requests with a path starting with `/foo`. 
+and uses the `blockpath` middleware plugin to block all HTTP GET requests with a path starting with `/foo`. 
 
 ```toml
 [http.routers]
